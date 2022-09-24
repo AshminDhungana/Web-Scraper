@@ -1,9 +1,7 @@
 """Microsoft Excel Read/Write Operation using openpyl"""
 
-from fileinput import filename
-from operator import ne
-import openpyxl
 from openpyxl import load_workbook
+from openpyxl.utils.exceptions import InvalidFileException
 from openpyxl import Workbook
 import os.path
 import re
@@ -28,10 +26,24 @@ class ExcelIO:
         else:
             return filename
 
-    #R Select Sheet and selects sheet from excel file
+
+    #Loads and Selects Sheet from excel file
     @classmethod
     def ExcelLoad(self, filename):
-        wb = load_workbook(filename)                    
+        running3 = True
+        while running3:
+            try:
+                wb = load_workbook(filename)
+                raise UnboundLocalError 
+            except FileNotFoundError:
+                filename = input("File not found, Enter file name or path correctly: ").strip()
+            except InvalidFileException:
+                print("File format not supported, support for only .xlsx,.xlsm,.xltx,.xltm ")
+                filename = input("Enter file name or path correctly: ").strip()
+            except UnboundLocalError:
+                running3 = False  
+            else: 
+                pass                  
         print(f'Sheets are: {wb.sheetnames}')
         running = True
         while running:
@@ -51,20 +63,21 @@ class ExcelIO:
     
     #Creates a new workbook and saves as filename
     @classmethod
-    def ExcelCreate(self, filename, operation = ''):
+    def ExcelCreate(self, filename='defult.xlsx', operation = ''):
         wb = Workbook()
         ws1 = wb.active
         running = True
         while running:
+            operation = input("Change File Operation: 0 to Save, 1 to create sheet and 2 to Exit. ").strip()
             match operation:
                 case '':
                     pass
                 case '0':      
                     wb.save(filename)
-                    running = False
                 case '1':
                     wb.create_sheet()
-            operation = input("Change File Operation, Enter 0 to Save then Exit. ").strip()
+                case '2':
+                    running = False
         return True  
 
 
